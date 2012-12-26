@@ -1,11 +1,15 @@
 #! /usr/bin/env sage
 
-def prob_of_shutting(tile_list,number_of_dice):
+def prob_of_losing(tile_list,number_of_dice):
     """
-    Returns the probability of being able to shut a tile
+    Returns the probability of turn ending for given dice throw
     """
-    s=Partitions(tile_list,max_part=6*number_of_dice,length=number_of_dice).cardinality()
-    return s/(6**number_of_dice)
+    #Need to fix this
+    s=0
+    for e in tile_list:
+        print Partitions(e,max_part=6*number_of_dice,length=number_of_dice).list()
+        s+=Partitions(e,max_part=6*number_of_dice,length=number_of_dice).cardinality()
+    return 1-s/(6**number_of_dice)
 
 def tiles(dice_roll,open_tiles=range(1,10)):
     """

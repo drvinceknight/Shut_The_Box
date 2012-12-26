@@ -1,5 +1,12 @@
 #! /usr/bin/env sage
 
+def prob_of_shutting(tile_list,number_of_dice):
+    """
+    Returns the probability of being able to shut a tile
+    """
+    s=Partitions(tile_list,max_part=6*number_of_dice,length=number_of_dice).cardinality()
+    return s/(6**number_of_dice)
+
 def tiles(dice_roll,open_tiles=range(1,10)):
     """
     A function to return the tiles available to close for a particular dice roll.
@@ -11,7 +18,12 @@ def tiles(dice_roll,open_tiles=range(1,10)):
     r=[e for e in r if Set(e) in  Subsets(open_tiles)]
     return r
 
-class GameInstance():
+class Tile():
+    def __init__(self,value):
+        self.value=value
+
+
+class ShutTheBox():
     """
     A class for a game
     """
@@ -24,5 +36,14 @@ class GameInstance():
             for e in number_list:
                 self.open_tiles.remove(e)
         else:
-            #FIX HERE
-            print "ERROR: %s is not available to shut. Pick a number from: %s"%(number,self.open_tiles)
+            print "ERROR: %s are (is) not available to shut. Pick a number from: %s"%(number_list,self.open_tiles)
+    def one_dice(self):
+        """
+        A method to check if it is worth using 1 dice or 2.
+        """
+        self.one_dice=False
+
+
+game=ShutTheBox()
+number_of_options=[len(game.potential_tiles(e)) for e in range(1,13)]
+p=list_plot(number_of_options)

@@ -1,4 +1,8 @@
 #! /usr/bin/env sage
+import random
+
+def roll_dice(number_of_dice):
+    return sum([random.randint(1,6) for e in range(number_of_dice)])
 
 def prob_of_rolling(value,number_of_dice):
     """
@@ -36,24 +40,29 @@ class Tile():
 
 class ShutTheBox():
     """
-    A class for a game
+    A class for a Shut the Box game
     """
     def __init__(self,upper_limit=9):
         self.open_tiles=range(1,10)
-    def potential_tiles(self,dice_roll):
-        return tiles(dice_roll,self.open_tiles)
+        self.one_dice_check()
+        self.potential_tiles_check()
+
+    def potential_tiles_check(self,dice_roll):
+        self.potential_tile=tiles(dice_roll,self.open_tiles)
+
     def shut_tile(self,number_list):
         if Set(number_list) in Subsets(self.open_tiles):
             for e in number_list:
                 self.open_tiles.remove(e)
         else:
             print "ERROR: %s are (is) not available to shut. Pick a number from: %s"%(number_list,self.open_tiles)
-    def one_dice(self):
+
+    def one_dice_check(self):
         """
         A method to check if it is worth using 1 dice or 2.
         """
         self.one_dice=False
-        if prob_of_being_able_to_play(self.open_tiles,1)>prob_of_being_able_to_play(self.open_tiles,2):
+        if prob_of_being_able_to_play(self.open_tiles,1)>prob_of_being_able_to_play(self.open_tiles,2) and {7,8,9} not in Subsets(self.open_tiles):
             self.one_dice=True
 
 

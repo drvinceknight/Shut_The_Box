@@ -1,4 +1,9 @@
 #! /usr/bin/env sage
+###################################################
+#                                                 #
+#            Shut The Box Code                    #
+#                                                 #
+###################################################
 import random
 
 def roll_dice(number_of_dice=1,sides=6):
@@ -76,29 +81,34 @@ class ShutTheBox():
         if prob_of_being_able_to_play(self.open_tiles,1)>prob_of_being_able_to_play(self.open_tiles,2) and self.one_dice_require not in Subsets(self.open_tiles):
             self.one_dice=True
 
-    def roll_dice(self,number_of_dice):
+    def roll_dice(self,number_of_dice,autoplay=False):
         """
         A method to roll dice and prompt user to close required tiles
         """
-        if number_of_dice==1:
-            if self.one_dice_require in Subsets(self.open_tiles):
-                print ""
-                print "ERROR: You are not allowed to roll %s dice"%number_of_dice
-                print ""
-                number_of_dice=2
-            elif not self.one_dice:
-                print ""
-                yn=raw_input("It is not in your interest to throw 1 dice, would you like to continue with 1 dice? (y/n)")
-                print ""
-                if yn=="n":
-                    number_of_dice=2
-        else:
+        if autoplay:
+            number_of_dice=2
             if self.one_dice:
-                print ""
-                yn=raw_input("It is in your interest to throw 1 dice, would you like to continue with 2 dice? (y/n):")
-                print ""
-                if yn=="n":
-                    number_of_dice=1
+                number_of_dice=1
+        else:
+            if number_of_dice==1:
+                if self.one_dice_require in Subsets(self.open_tiles):
+                    print ""
+                    print "ERROR: You are not allowed to roll %s dice"%number_of_dice
+                    print ""
+                    number_of_dice=2
+                elif not self.one_dice:
+                    print ""
+                    yn=raw_input("It is not in your interest to throw 1 dice, would you like to continue with 1 dice? (y/n)")
+                    print ""
+                    if yn=="n":
+                        number_of_dice=2
+            else:
+                if self.one_dice:
+                    print ""
+                    yn=raw_input("It is in your interest to throw 1 dice, would you like to continue with 2 dice? (y/n):")
+                    print ""
+                    if yn=="n":
+                        number_of_dice=1
 
         self.last_roll=roll_dice(number_of_dice,sides=self.sides)
         self.potential_tiles_check(self.last_roll)
@@ -109,24 +119,41 @@ class ShutTheBox():
             print ""
             print "You have no potential moves"
         else:
-            yn=raw_input("Would you like to list the available moves? (y/n):")
-            if yn=="y":
-                print ""
-                for e in self.potential_tile:
-                    print e
+            if not autoplay:
+                yn=raw_input("Would you like to list the available moves? (y/n):")
+                if yn=="y":
+                    print ""
+                    for e in self.potential_tile:
+                        print e
 
-            tile_list=input("\nList the tiles you would like to close:")
+                tile_list=input("\nList the tiles you would like to close:")
+            else:
+                tile_list=eval("%s(%s,%s)"%(autoplay,self.open_tiles,self.potential_tile))
             self.shut_tile(tile_list)
 
     def play(self,autoplay=False):
         while len(self.open_tiles)>0:
-            self.roll_dice(2)
+            self.roll_dice(2,autoplay)
             if self.potential_tile==[]:
                 break
         print ""
         print "The game is over, your score is: %s"%sum(self.open_tiles)
 
+#######################
+#                     #
+# Autoplay Strategies #
+#                     #
+#######################
 
 
-game=ShutTheBox()
-print game.open_tiles
+def random_play(open_tiles,potential_tiles):
+    """
+    This method chooses a random play from the potential tiles.
+    """
+    return random.choice(potential_tiles)
+
+
+def greedy(open_tiles,potential_tiles):
+    """
+    This method explores all possible moves and chooses that leaves the best subsequent set of tiles.
+    """

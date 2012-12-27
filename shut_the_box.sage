@@ -192,7 +192,7 @@ def greedy(open_tiles,potential_tiles):
 
 
 
-def Experiment(output_file="Shut_the_Box.csv"):
+def experiment(output_file="Shut_the_Box.csv"):
     while True:
         temp_greedy=ShutTheBox()
         temp_greedy.play("greedy")

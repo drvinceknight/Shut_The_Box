@@ -1,15 +1,22 @@
 #! /usr/bin/env sage
 
-def prob_of_losing(tile_list,number_of_dice):
+def prob_of_rolling(value,number_of_dice):
     """
-    Returns the probability of turn ending for given dice throw
+    A function to return the probability of rolling a particular value given a number of dice
     """
-    #Need to fix this
-    s=0
-    for e in tile_list:
-        print Partitions(e,max_part=6*number_of_dice,length=number_of_dice).list()
-        s+=Partitions(e,max_part=6*number_of_dice,length=number_of_dice).cardinality()
-    return 1-s/(6**number_of_dice)
+    valid_rolls=[e for e in tuples(range(1,7),number_of_dice) if sum(e)==value]
+    return len(valid_rolls)/(6**number_of_dice)
+
+
+def prob_of_being_able_to_play(open_tiles,number_of_dice):
+    """
+    Returns the probability of turn not ending on any given go.
+    """
+    p=0
+    for n in range(1,6*number_of_dice+1):
+        if len(tiles(n,open_tiles))>0:
+            p+=prob_of_rolling(n,number_of_dice)
+    return p
 
 def tiles(dice_roll,open_tiles=range(1,10)):
     """
@@ -46,8 +53,11 @@ class ShutTheBox():
         A method to check if it is worth using 1 dice or 2.
         """
         self.one_dice=False
+        if prob_of_being_able_to_play(self.open_tiles,1)>prob_of_being_able_to_play(self.open_tiles,2):
+            self.one_dice=True
 
 
 game=ShutTheBox()
-number_of_options=[len(game.potential_tiles(e)) for e in range(1,13)]
-p=list_plot(number_of_options)
+print game.open_tiles
+game.one_dice()
+print game.one_dice

@@ -4,6 +4,7 @@
 #            Shut The Box Code                    #
 #                                                 #
 ###################################################
+import csv
 import random
 
 def roll_dice(number_of_dice=1,sides=6):
@@ -16,6 +17,12 @@ def prob_of_rolling(value,number_of_dice,sides=6):
     valid_rolls=[e for e in tuples(range(1,sides+1),number_of_dice) if sum(e)==value]
     return len(valid_rolls)/(sides**number_of_dice)
 
+def shut_tile(open_tiles,tiles):
+    r=list(open_tiles)
+    if Set(tiles) in Subsets(r):
+        for e in tiles:
+            r.remove(e)
+    return r
 
 def prob_of_being_able_to_play(open_tiles,number_of_dice,sides=6):
     """
@@ -31,6 +38,8 @@ def tiles(dice_roll,open_tiles=range(1,10)):
     """
     A function to return the tiles available to close for a particular dice roll.
     """
+    if open_tiles==[]:
+        return []
     r=Partitions(dice_roll, max_slope=-1).list()
     #Need next statement as max_slope and max_part do not seem to play nice together.
     r=[e for e in r if max(e)<=max(open_tiles)]
@@ -50,11 +59,14 @@ class ShutTheBox():
     def __init__(self,upper_limit=9,sides=6,one_dice_require={7,8,9}):
         self.sides=sides
         self.open_tiles=range(1,10)
+        self.tile_history=[]
         self.one_dice_check()
         self.potential_tiles_check(self.open_tiles)
         self.one_dice_require=one_dice_require
         print "An instance of Shut the Box has been initiated:\n\t%s"%self.open_tiles
 
+    def score(self):
+        return sum(self.open_tiles)
 
     def shut_tile(self,number_list):
         if Set(number_list) in Subsets(self.open_tiles):
@@ -110,34 +122,42 @@ class ShutTheBox():
                     if yn=="n":
                         number_of_dice=1
 
-        self.last_roll=roll_dice(number_of_dice,sides=self.sides)
-        self.potential_tiles_check(self.last_roll)
-        print ""
-        print "You rolled %s %s sided dice and obtained: %s"%(number_of_dice,self.sides,self.last_roll)
-        print ""
-        if len(self.potential_tile)==0:
-            print ""
-            print "You have no potential moves"
-        else:
-            if not autoplay:
-                yn=raw_input("Would you like to list the available moves? (y/n):")
-                if yn=="y":
-                    print ""
-                    for e in self.potential_tile:
-                        print e
+        if len(self.open_tiles)>0:
+            self.last_roll=roll_dice(number_of_dice,sides=self.sides)
 
-                tile_list=input("\nList the tiles you would like to close:")
+            self.potential_tiles_check(self.last_roll)
+            print "You rolled %s %s sided dice and obtained: %s"%(number_of_dice,self.sides,self.last_roll)
+            print ""
+            if len(self.potential_tile)==0:
+                print ""
+                print "You have no potential moves"
             else:
-                tile_list=eval("%s(%s,%s)"%(autoplay,self.open_tiles,self.potential_tile))
-            self.shut_tile(tile_list)
+                if not autoplay:
+                    yn=raw_input("Would you like to list the available moves? (y/n):")
+                    if yn=="y":
+                        print ""
+                        for e in self.potential_tile:
+                            print e
+
+                    tile_list=input("\nList the tiles you would like to close:")
+                else:
+                    tile_list=eval("%s(%s,%s)"%(autoplay,self.open_tiles,self.potential_tile))
+                self.shut_tile(tile_list)
+                self.tile_history.append(tile_list)
+
 
     def play(self,autoplay=False):
         while len(self.open_tiles)>0:
             self.roll_dice(2,autoplay)
             if self.potential_tile==[]:
                 break
-        print ""
-        print "The game is over, your score is: %s"%sum(self.open_tiles)
+        self.final_score=self.score()
+        string="The game is over, your score is: %s\n"%self.score()
+        print (len(string)+4)*"-"
+        print "| ",len(string)*" "," |"
+        print "| "+string+" |"
+        print "| ",len(string)*" "," |"
+        print (len(string)+4)*"-"
 
 #######################
 #                     #
@@ -157,3 +177,31 @@ def greedy(open_tiles,potential_tiles):
     """
     This method explores all possible moves and chooses that leaves the best subsequent set of tiles.
     """
+    best_move=potential_tiles[0]
+    best_prob=prob_of_being_able_to_play(shut_tile(open_tiles,best_move),2)
+    if {7,8,9} in Subsets(open_tiles):
+        best_prob=max(best_prob,prob_of_being_able_to_play(shut_tile(open_tiles,best_move),1))
+    for e in potential_tiles[1:]:
+        temp_prob=prob_of_being_able_to_play(shut_tile(open_tiles,e),2)
+        if {7,8,9} in Subsets(open_tiles):
+            temp_prob=max(temp_prob,prob_of_being_able_to_play(shut_tile(open_tiles,e),1))
+        if temp_prob>best_prob:
+            best_move=e
+            best_prob=temp_prob
+    return best_move
+
+
+
+def Experiment(output_file="Shut_the_Box.csv"):
+    while True:
+        temp_greedy=ShutTheBox()
+        temp_greedy.play("greedy")
+        temp_random=ShutTheBox()
+        temp_random.play("random_play")
+        row=[temp_greedy.score(),temp_greedy.tile_history,temp_random.score(),temp_random.tile_history]
+
+        file=open(output_file,"ab")
+        outfile=csv.writer(file)
+        outfile.writerow(row)
+        file.close()
+

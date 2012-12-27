@@ -48,6 +48,7 @@ class ShutTheBox():
         self.one_dice_check()
         self.potential_tiles_check(self.open_tiles)
         self.one_dice_require=one_dice_require
+        print "An instance of Shut the Box has been initiated:\n\t%s"%self.open_tiles
 
 
     def shut_tile(self,number_list):
@@ -72,16 +73,20 @@ class ShutTheBox():
         A method to check if it is worth using 1 dice or 2.
         """
         self.one_dice=False
-        if prob_of_being_able_to_play(self.open_tiles,1)>prob_of_being_able_to_play(self.open_tiles,2) and one_dice_require not in Subsets(self.open_tiles):
+        if prob_of_being_able_to_play(self.open_tiles,1)>prob_of_being_able_to_play(self.open_tiles,2) and self.one_dice_require not in Subsets(self.open_tiles):
             self.one_dice=True
 
     def roll_dice(self,number_of_dice):
+        """
+        A method to roll dice and prompt user to close required tiles
+        """
         if number_of_dice==1:
-            if self.one_dice_require not in Subsets(self.open_tiles):
+            if self.one_dice_require in Subsets(self.open_tiles):
                 print ""
                 print "ERROR: You are not allowed to roll %s dice"%number_of_dice
                 print ""
-            if not self.one_dice:
+                number_of_dice=2
+            elif not self.one_dice:
                 print ""
                 yn=raw_input("It is not in your interest to throw 1 dice, would you like to continue with 1 dice? (y/n)")
                 print ""
@@ -100,14 +105,26 @@ class ShutTheBox():
         print ""
         print "You rolled %s %s sided dice and obtained: %s"%(number_of_dice,self.sides,self.last_roll)
         print ""
-        yn=raw_input("Would you like to list the available moves? (y/n):")
-        if yn=="y":
+        if len(self.potential_tile)==0:
             print ""
-            for e in self.potential_tile:
-                print e
+            print "You have no potential moves"
+        else:
+            yn=raw_input("Would you like to list the available moves? (y/n):")
+            if yn=="y":
+                print ""
+                for e in self.potential_tile:
+                    print e
 
-        tile_list=input("\nList the tiles you would like to close:")
-        self.shut_tile(tile_list)
+            tile_list=input("\nList the tiles you would like to close:")
+            self.shut_tile(tile_list)
+
+    def play(self,autoplay=False):
+        while len(self.open_tiles)>0:
+            self.roll_dice(2)
+            if self.potential_tile==[]:
+                break
+        print ""
+        print "The game is over, your score is: %s"%sum(self.open_tiles)
 
 
 

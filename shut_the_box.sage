@@ -172,6 +172,19 @@ def random_play(open_tiles,potential_tiles):
     """
     return random.choice(potential_tiles)
 
+def shortest_play(open_tiles,potential_tiles):
+    """
+    This method chooses the shortest available set of tiles (if multiple, it choose randomly).
+    """
+    min_length=min([len(e) for e in potential_tiles])
+    return random.choice([e for e in potential_tiles if len(e)==min_length])
+
+def longest_play(open_tiles,potential_tiles):
+    """
+    This method chooses the longest available set of tiles (if multiple, it choose randomly).
+    """
+    max_length=max([len(e) for e in potential_tiles])
+    return random.choice([e for e in potential_tiles if len(e)==max_length])
 
 def greedy(open_tiles,potential_tiles):
     """
@@ -198,7 +211,11 @@ def experiment(output_file="Shut_the_Box.csv"):
         temp_greedy.play("greedy")
         temp_random=ShutTheBox()
         temp_random.play("random_play")
-        row=[temp_greedy.score(),temp_greedy.tile_history,temp_random.score(),temp_random.tile_history]
+        temp_max=ShutTheBox()
+        temp_max.play("longest_play")
+        temp_min=ShutTheBox()
+        temp_min.play("shortest_play")
+        row=[temp_greedy.score(),temp_greedy.tile_history,temp_random.score(),temp_random.tile_history,temp_max.score(),temp_max.tile_history,temp_min.score(),temp_min.tile_history]
 
         file=open(output_file,"ab")
         outfile=csv.writer(file)

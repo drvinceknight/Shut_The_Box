@@ -17,6 +17,7 @@ To play the game apply the 'play' method:
 
     sage: game.play()
 
+This will then follow with prompts for the user. A prompt will appear when it is in the users interest to use a single dice (and when this is allowed).
 # License Information #
 
 This work is licensed under a [Creative Commons Attribution-ShareAlike 3.0](http://creativecommons.org/licenses/by-sa/3.0/us/) license.  You are free to:

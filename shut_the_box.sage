@@ -244,7 +244,7 @@ def greedy_play(open_tiles,potential_tiles):
 def experiment(output_file="Shut_the_Box.csv"):
     while True:
         temp_greedy=ShutTheBox()
-        temp_greedy.play("greedy")
+        temp_greedy.play("greedy_play")
         temp_random=ShutTheBox()
         temp_random.play("random_play")
         temp_max=ShutTheBox()

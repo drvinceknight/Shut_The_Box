@@ -45,7 +45,7 @@ There are 4 autoplays currently programmed:
 
 #Experiment
 
-The experiment function runs collects data comparing all the above autoplays. This outputs by default to a csv file "Shut_the_Box.csv" but other file names can be passed:
+The experiment function collects data comparing all the above autoplays (Ctrl+C quits). This outputs by default to a csv file "Shut_the_Box.csv" but other file names can be passed:
 
     sage: experiment("My_file_name.csv")
 

@@ -1,27 +1,54 @@
 #! /usr/bin/env sage
 ###################################################
 #                                                 #
-#            Shut The Box Code                    #
+#               Shut The Box                      #
+#           www.vincent-knight.com                #
 #                                                 #
 ###################################################
+"""
+This file contains code that allows manual and/or autoplay of the Shut The Box Parlour game.
+
+The main class is ShutTheBox() which creates and instance of the game. Any given instance can then be "played" using the play() method. Note that an autoplay strategy can be passed to the play method.
+
+"""
 import csv
 import random
 
 def roll_dice(number_of_dice=1,sides=6):
+    """
+    Returns the sum of a dice roll of any number of dice of any given number of sides.
+    """
     return sum([random.randint(1,sides) for e in range(number_of_dice)])
 
 def prob_of_rolling(value,number_of_dice,sides=6):
     """
-    A function to return the probability of rolling a particular value given a number of dice
+    A function to return the probability of rolling a particular value given a number of dice.
     """
     valid_rolls=[e for e in tuples(range(1,sides+1),number_of_dice) if sum(e)==value]
     return len(valid_rolls)/(sides**number_of_dice)
 
 def shut_tile(open_tiles,tiles):
+    """
+    A function that removes a set of tiles of an open set of tiles.
+    """
     r=list(open_tiles)
     if Set(tiles) in Subsets(r):
         for e in tiles:
             r.remove(e)
+    return r
+
+def available_tiles(dice_roll,open_tiles=range(1,10)):
+    """
+    A function to return the tiles available to close for a particular dice roll.
+    """
+    if open_tiles==[]:#Quick check to return null list if not tiles are open
+        return []
+    #Following code obtains descending partitions with maximum size that are are subsets of the open tiles.
+    r=Partitions(dice_roll, max_slope=-1).list()
+    #Need next statement as max_slope and max_part (two sage commands) do not seem to play nice together.
+    r=[e for e in r if max(e)<=max(open_tiles)]
+    #Final check to ensure that partitions are subsets of open tiles.
+    r=[e for e in r if Set(e) in  Subsets(open_tiles)]
     return r
 
 def prob_of_being_able_to_play(open_tiles,number_of_dice,sides=6):
@@ -29,46 +56,43 @@ def prob_of_being_able_to_play(open_tiles,number_of_dice,sides=6):
     Returns the probability of turn not ending on any given go.
     """
     p=0
-    for n in range(1,sides*number_of_dice+1):
-        if len(tiles(n,open_tiles))>0:
+    for n in range(1,sides*number_of_dice+1):#Iterates over all possible outcomes of dice roll
+        if len(available_tiles(n,open_tiles))>0:#Sum the probabilities of rolling a particular sum if there is a possibility of playing.
             p+=prob_of_rolling(n,number_of_dice)
     return p
 
-def tiles(dice_roll,open_tiles=range(1,10)):
-    """
-    A function to return the tiles available to close for a particular dice roll.
-    """
-    if open_tiles==[]:
-        return []
-    r=Partitions(dice_roll, max_slope=-1).list()
-    #Need next statement as max_slope and max_part do not seem to play nice together.
-    r=[e for e in r if max(e)<=max(open_tiles)]
-    #Final check to ensure that partitions are subsets of open tiles.
-    r=[e for e in r if Set(e) in  Subsets(open_tiles)]
-    return r
-
-class Tile():
-    def __init__(self,value):
-        self.value=value
-
-
 class ShutTheBox():
     """
-    A class for a Shut the Box game
+    The class for the game. This class has one main method: "play" which can be used to play the game. This automatically starts a game with prompts throughout (for example when the player could use just 1 dice and it is in their interest to do so the method prompts the player).
+
+The instance has various attributes:
+        - upper_limit: The larger number (default=9)
+        - sides: Number of sides on each dice (default=6)
+        - one_dice_require: Tiles that must be down to allow the use of one dice.
+        - tile_history: A history of all sets of tiles that are lowered at each go.
+        - last_roll: the last roll of a dice
+        - potential_tiles: The tiles available to lower given the last_roll
     """
     def __init__(self,upper_limit=9,sides=6,one_dice_require={7,8,9}):
         self.sides=sides
         self.open_tiles=range(1,10)
         self.tile_history=[]
+        self.one_dice_require=one_dice_require
         self.one_dice_check()
         self.potential_tiles_check(self.open_tiles)
-        self.one_dice_require=one_dice_require
-        print "An instance of Shut the Box has been initiated:\n\t%s"%self.open_tiles
+        print 40*"*"
+        print ""
+        print "Let's play!:\n\n\t%s"%self.open_tiles
+        print ""
+        print 40*"*"
 
     def score(self):
         return sum(self.open_tiles)
 
     def shut_tile(self,number_list):
+        """
+        Method used to shut tiles.
+        """
         if Set(number_list) in Subsets(self.open_tiles):
             for e in number_list:
                 self.open_tiles.remove(e)
@@ -76,14 +100,14 @@ class ShutTheBox():
             self.one_dice_check()
             number_list.sort()
             print ""
-            print "Tiles %s have been shut"%number_list
-            print "The following tiles are still open:\n\t%s"%self.open_tiles
+            print "Tiles %s have been shut."%number_list
+            print "\nThe following tiles are still open:\n\n\t%s"%self.open_tiles
             print ""
         else:
             print "ERROR: %s are (is) not available to shut. Pick a number from: %s"%(number_list,self.open_tiles)
 
     def potential_tiles_check(self,dice_roll):
-        self.potential_tile=tiles(dice_roll,self.open_tiles)
+        self.potential_tiles=available_tiles(dice_roll,self.open_tiles)
 
     def one_dice_check(self):
         """
@@ -95,8 +119,9 @@ class ShutTheBox():
 
     def roll_dice(self,number_of_dice,autoplay=False):
         """
-        A method to roll dice and prompt user to close required tiles
+        A method to roll dice user to close required tiles (prompts player if tiles are already lowered, and also prompts player if number of dice chosen is not optimal.)
         """
+        #Choose number of dice (prompt user unless autoplay is True):
         if autoplay:
             number_of_dice=2
             if self.one_dice:
@@ -105,7 +130,7 @@ class ShutTheBox():
             if number_of_dice==1:
                 if self.one_dice_require in Subsets(self.open_tiles):
                     print ""
-                    print "ERROR: You are not allowed to roll %s dice"%number_of_dice
+                    print "ERROR: You are not allowed to roll %s dice."%number_of_dice
                     print ""
                     number_of_dice=2
                 elif not self.one_dice:
@@ -122,49 +147,60 @@ class ShutTheBox():
                     if yn=="n":
                         number_of_dice=1
 
+        #Identify potential tiles to lower and prompt user for required tile or use given autoplay strategy
         if len(self.open_tiles)>0:
             self.last_roll=roll_dice(number_of_dice,sides=self.sides)
 
             self.potential_tiles_check(self.last_roll)
-            print "You rolled %s %s sided dice and obtained: %s"%(number_of_dice,self.sides,self.last_roll)
+            print "\nYou rolled %s %s sided dice and obtained: %s"%(number_of_dice,self.sides,self.last_roll)
             print ""
-            if len(self.potential_tile)==0:
+            if len(self.potential_tiles)==0:
                 print ""
-                print "You have no potential moves"
+                print "You have no potential moves."
             else:
                 if not autoplay:
                     yn=raw_input("Would you like to list the available moves? (y/n):")
                     if yn=="y":
                         print ""
-                        for e in self.potential_tile:
+                        for e in self.potential_tiles:
                             print e
 
                     tile_list=input("\nList the tiles you would like to close:")
                 else:
-                    tile_list=eval("%s(%s,%s)"%(autoplay,self.open_tiles,self.potential_tile))
+                    tile_list=eval("%s(%s,%s)"%(autoplay,self.open_tiles,self.potential_tiles))
                 self.shut_tile(tile_list)
                 self.tile_history.append(tile_list)
 
 
     def play(self,autoplay=False):
+        """
+        The play method which when runs will either use the autoplay strategy or prompt the user.
+        """
         while len(self.open_tiles)>0:
             self.roll_dice(2,autoplay)
-            if self.potential_tile==[]:
+            if self.potential_tiles==[]:
                 break
         self.final_score=self.score()
-        string="The game is over, your score is: %s\n"%self.score()
-        print (len(string)+4)*"-"
+        string="Game over, your score is: %s."%self.score()
+        print ""
+        print (len(string)+6)*"-"
         print "| ",len(string)*" "," |"
-        print "| "+string+" |"
+        print "|  "+string+"  |"
         print "| ",len(string)*" "," |"
-        print (len(string)+4)*"-"
+        print (len(string)+6)*"-"
 
 #######################
 #                     #
 # Autoplay Strategies #
 #                     #
 #######################
+"""
+This section contains functions for autoplay, the take as inputs:
+- open_tiles: a list containing the current open tiles.
+- potential_tiles: a list of potential moves.
 
+The output must be a list of tiles to close.
+"""
 
 def random_play(open_tiles,potential_tiles):
     """
@@ -186,7 +222,7 @@ def longest_play(open_tiles,potential_tiles):
     max_length=max([len(e) for e in potential_tiles])
     return random.choice([e for e in potential_tiles if len(e)==max_length])
 
-def greedy(open_tiles,potential_tiles):
+def greedy_play(open_tiles,potential_tiles):
     """
     This method explores all possible moves and chooses that leaves the best subsequent set of tiles.
     """

@@ -1,6 +1,6 @@
 #Some analysis of the game Shut the Box
 
-This Christmas, [Zoe]() and I got my mother a small board game called: "Shut the Box". It's a neat little game with all sorts of underlying mathematics.
+This Christmas, [Zoe]() and I got my mother a small board game called: "Shut the Box" (also known as "Tric-Trac", "Canoga", "Klackers", "Zoltan Box", "Batten Down the Hatches", or "High Rollers" according to the wiki [page](http://en.wikipedia.org/wiki/Shut_the_Box)). It's a neat little game with all sorts of underlying mathematics.
 
 Here are some pictures of us playing:
 
@@ -8,7 +8,7 @@ Here are some pictures of us playing:
 
 ![]()
 
-A good description of the game can be found on the wiki [page]() but basically the game can be described as follows:
+A good description of the game can be found on the wiki [page](http://en.wikipedia.org/wiki/Shut_the_Box) but basically the game can be described as follows:
 
 - It is a Solitaire game that can be played in turns and scores compared (but no strategies arise due to interactions of players)
 - The aim is to "shut" as many tiles (each being one of the digits from 1 to 9) as possible.
@@ -20,7 +20,9 @@ Here's a plot of a game we played with a few of my mother's friends:
 
 ![]()
 
-The game could be modelled as a Markov Decision Process but over the past few days I decided to code it in [Sage]() and investigate whether or not I could find out anything cool with regards to strategies. If you're not aware of Sage I thoroughly recommend you taking a look, it's an awesome open source mathematics package. In this instance I used the Partition function to rapidly obtain various combinations of dice rolls and/or tile options to get the results I wanted.
+You can see that myself and Jean did fairly poorly while Zoe made the difference just at the end to win :)
+
+The game could be modelled as a Markov Decision Process but over the past few days I decided to code it in [Sage](http://sagemath.org/) and investigate whether or not I could find out anything cool with regards to strategies. If you're not aware of Sage I thoroughly recommend you taking a look, it's an awesome open source mathematics package. In this instance I used the Partition function to rapidly obtain various combinations of dice rolls and/or tile options to get the results I wanted.
 
 The code is all on in a github [repo]() and I feel I've written an ok README file explaining how it works so if you're interested in playing with it youcan. The code basically has two parts, the first allows you to play using the program instead of a game board (with prompts telling you what your available plays are).
 
@@ -29,8 +31,8 @@ Here's a quick screencast of me playing the game:
 The second part of the code allows for strategies to be written that play the game automatically ("autoplay"). I've considered 4 strateges:
 
 - Random (Just randomly pick any potential tile combination)
-- Shortest (Choose the tile combination that is shortest: i.e. [3] instead of [1,2])
-- Longest (Choose the tile combination that is longest: i.e. [1,2] instead of [3])
+- Shortest (Choose the tile combination that is shortest: i.e. [3] instead of [1,2] ~ in case of a tie pick randomly)
+- Longest (Choose the tile combination that is longest: i.e. [1,2] instead of [3] ~ in case of a tie pick randomly)
 - Greedy. This chooses the tile combination that ensures the best possible chance of the game not ending on the next go. This is calculated by summing the probabilities of obtaining a dice roll that could be obtained.
 
 I've been leaving my computer run the code in the background for a while now so here are some early results.

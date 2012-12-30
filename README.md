@@ -4,6 +4,8 @@ This repo contains files relevant to the parlour game: [Shut the Box](http://en.
 
 The code is written in [Sage](http://sagemath.org/) which is an open source mathematics package based on Python. The code can be used to play shut the box manually or to evaluate playing strategies by passing an autoplay option.
 
+This code is used in this [blog post](http://goo.gl/zViSX) and a demo is given in this [screencast](http://youtu.be/943tIKxV6w8).
+
 #Instructions
 
 ##Manual Play

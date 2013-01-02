@@ -34,7 +34,7 @@ print("Mean Game Length with Longest autoplay:")
 print(mean(Longest$Game_Length, na.rm=TRUE))
 print("Mean Game Length with Greedy autoplay:")
 print(mean(Greedy$Game_Length, na.rm=TRUE))
-p<-ggplot(shut_the_box_score_data,aes(x=Game_Length,color=Method))+geom_density(alpha=.5)+xlab("Game Length")+ylab("Density")+opts(title = expression("Distribution of Shut the Box game Lengths"))
+p<-ggplot(shut_the_box_score_data,aes(Game_Length, ..density.., colour = Method))+geom_freqpoly(binwidth=1)+xlab("Game Length")+ylab("Density")+opts(title = expression("Distribution of Shut the Box game Lengths"))
 ggsave("Game_Length_Density.pdf")
 ggsave("Game_Length_Density.png")
 
